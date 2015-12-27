@@ -8,6 +8,8 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import org.dc.jdbc.core.ConnThreadShare;
 
+import com.dc.utils.ObjectFactory;
+
 public final class JDBCProxy implements MethodInterceptor {
 	private static class JDBCProxyHolder {    
 		private static final JDBCProxy INSTANCE = new JDBCProxy();
@@ -33,6 +35,7 @@ public final class JDBCProxy implements MethodInterceptor {
 			ConnThreadShare.commit(threadId);
 			ConnThreadShare.closeConnection(threadId);
 		}
+		System.out.println(ObjectFactory.accSource.getActiveCount());
 		return invokeObj;
 	}
 	public Object getTarget(Object target) {

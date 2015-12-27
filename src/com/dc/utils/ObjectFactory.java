@@ -14,8 +14,8 @@ import com.alibaba.druid.pool.DruidDataSource;
 public class ObjectFactory {
 	private static Lock lock = new ReentrantLock();
 	private static Map<Class<?>,Object> objMap = new HashMap<Class<?>,Object>();
-	private static DruidDataSource testSource = new DruidDataSource();
-	private static DruidDataSource accSource = new DruidDataSource();
+	public static DruidDataSource testSource = new DruidDataSource();
+	public static DruidDataSource accSource = new DruidDataSource();
 	static{
 		testSource.setUrl("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8");
 		testSource.setUsername("root");
@@ -26,8 +26,8 @@ public class ObjectFactory {
 			log.error("",e);
 		}
 		testSource.setConnectionProperties("config.decrypt=true");*/
-		testSource.setInitialSize(2);
-		testSource.setMaxActive(3);
+		testSource.setInitialSize(1);
+		testSource.setMaxActive(4);
 		testSource.setMinIdle(0);
 		testSource.setMaxWait(60000);
 		testSource.setValidationQuery("SELECT 1");
@@ -46,8 +46,8 @@ public class ObjectFactory {
 			log.error("",e);
 		}
 		testSource.setConnectionProperties("config.decrypt=true");*/
-		accSource.setInitialSize(1);
-		accSource.setMaxActive(3);
+		accSource.setInitialSize(2);
+		accSource.setMaxActive(4);
 		accSource.setMinIdle(0);
 		accSource.setMaxWait(60000);
 		accSource.setValidationQuery("SELECT 1");

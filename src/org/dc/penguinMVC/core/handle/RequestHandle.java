@@ -1,19 +1,13 @@
 package org.dc.penguinMVC.core.handle;
 
-import java.util.Enumeration;
+import java.lang.reflect.Field;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.dc.penguinMVC.core.util.ClassTypeUtils;
-
 public class RequestHandle {
-	/*private Object obj;
-	private Method methodInstance;
-	private Class<?>[] paramClass;//
-	 */	
 	private Class<?> clazz;
 	private String methodName;
 	private Class<?>[] parameterTypes;
@@ -27,102 +21,306 @@ public class RequestHandle {
 				Class<?> paramType = parameterTypes[i];
 				if(Map.class.isAssignableFrom(paramType)){
 					paramObjs[i] = map;
-				}else if(paramType.getClassLoader()==null){//基本数据类型
-					Object[] objs = (Object[])map.get(paramName[i]);
-					if(objs!=null && objs.length>0){
-						if(paramType.isArray()){
-							Object[] myparamObjs = ClassTypeUtils.getNewInstances(paramType.getComponentType().getSimpleName(), objs.length);
-							for (int j = 0; j < objs.length; j++) {
-								System.out.println(paramType.getComponentType().getName());
-								myparamObjs[j] = getTypeValue(paramType.getComponentType(),objs[j]);
-							}
-							paramObjs[i] = myparamObjs;
-						}else{
-							paramObjs[i] =getTypeValue(paramType,objs[0]);
-						}
-					}
 				}else if(ServletRequest.class.isAssignableFrom(paramType)){
 					paramObjs[i] = request;
 				}else if(ServletResponse.class.isAssignableFrom(paramType)){
 					paramObjs[i] = response;
 				}else if(HttpSession.class.isAssignableFrom(paramType)){
 					paramObjs[i] = session;
+				}else if(paramType.getClassLoader()==null){//基本数据类型
+					Object[] objs = (Object[])map.get(paramName[i]);
+					if(objs!=null && objs.length>0){
+						paramObjs[i] = this.getTypeValue(paramType,objs);
+					}
+				}else{//对象
+					Object obj_newInsten = paramType.newInstance();
+					Field[] fields = paramType.getDeclaredFields();
+					for (Map.Entry<?, ?> entry : map.entrySet()) {
+						String jsp_key = entry.getKey().toString();
+						Object[] key_value = (Object[])entry.getValue();
+						for (int j = 0,j_len=fields.length; j <j_len; j++) {
+							Field fd = fields[j];
+							Class<?> classType = fd.getType();
+							if((paramName[i]+"."+fd.getName()).equals(jsp_key)){
+								fd.setAccessible(true); //
+								fd.set(obj_newInsten,this.getTypeValue(classType, key_value));
+								break;
+							}
+						}
+					}
+					paramObjs[i] = obj_newInsten;
 				}
 			}
 		}
 		Object obj = clazz.newInstance();
-		//paramObjs[0] = new int[10];
 		return obj.getClass().getMethod(methodName, parameterTypes).invoke(obj, paramObjs);
 	}
 
 
-	public Object getTypeValue(Class<?> paramTpye,Object value){
-		if(String.class.isAssignableFrom(paramTpye)){
-			if(value!=null){
-				return value.toString();
+	public Object getTypeValue(Class<?> classType,Object[] value){
+		int len = value.length;
+		if(String.class.isAssignableFrom(classType)){
+			String[] byte_arr = new String[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null){
+					byte_arr[i] =value[i].toString();
+				}else{
+					byte_arr[i] = null;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return new String();
+				return byte_arr[0];
 			}
 		}
-		if(Integer.class.isAssignableFrom(paramTpye) || paramTpye.getSimpleName().equals("int")){
-			if(value!=null && !value.toString().equals("")){
-				return Integer.parseInt(value.toString());
+		if(Byte.TYPE.isAssignableFrom(classType)){
+			byte[] byte_arr = new byte[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Byte.parseByte(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return 0;
+				return byte_arr[0];
 			}
 		}
-		if(Float.class.isAssignableFrom(paramTpye) || paramTpye.getName().equals("float")){
-			if(value!=null && !value.toString().equals("")){
-				return Float.parseFloat(value.toString());
+		if(Byte.class.isAssignableFrom(classType)){
+			Byte[] byte_arr = new Byte[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Byte.parseByte(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return 0F;
+				return byte_arr[0];
 			}
 		}
-		if(Double.class.isAssignableFrom(paramTpye) || paramTpye.getName().equals("double")){
-			if(value!=null && !value.equals("")){
-				return Double.parseDouble(value.toString());
+		if(Character.class.isAssignableFrom(classType)){
+			Character[] byte_arr = new Character[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =value[i].toString().charAt(0);
+				}else{
+					byte_arr[i] = '\u0000';
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return 0D;
+				return byte_arr[0];
 			}
 		}
-		if(Boolean.class.isAssignableFrom(paramTpye)){
-			if((value!=null && !value.toString().equals("") && value.toString().equals("true")) || value.toString().equals("1")){
-				return true;
+		if(Character.TYPE.isAssignableFrom(classType)){
+			char[] byte_arr = new char[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =value[i].toString().charAt(0);
+				}else{
+					byte_arr[i] = '\u0000';
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return false;
+				return byte_arr[0];
 			}
 		}
-		if(Character.class.isAssignableFrom(paramTpye)){
-			if(value!=null && !value.toString().equals("")){
-				return value.toString().charAt(0);
+		if(Integer.TYPE.isAssignableFrom(classType)){
+			int[] byte_arr = new int[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Integer.parseInt(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return ' ';
+				return byte_arr[0];
 			}
 		}
-		if(Byte.class.isAssignableFrom(paramTpye)){
-			if(value!=null && !value.toString().equals("")){
-				return Byte.parseByte(value.toString());
+		if(Integer.class.isAssignableFrom(classType)){
+			Integer[] byte_arr = new Integer[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Integer.parseInt(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return (byte)0;
+				return byte_arr[0];
 			}
 		}
-		if(Short.class.isAssignableFrom(paramTpye)){
-			if(value!=null && !value.toString().equals("")){
-				return Short.parseShort(value.toString());
+		if(Short.class.isAssignableFrom(classType)){
+			Short[] byte_arr = new Short[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Short.parseShort(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
 			}else{
-				return (byte)0;
+				return byte_arr[0];
+			}
+		}
+		if(Short.TYPE.isAssignableFrom(classType)){
+			short[] byte_arr = new short[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Short.parseShort(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Float.TYPE.isAssignableFrom(classType)){
+			float[] byte_arr = new float[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Float.parseFloat(value[i].toString());
+				}else{
+					byte_arr[i] = 0;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Float.class.isAssignableFrom(classType)){
+			Float[] byte_arr = new Float[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Float.parseFloat(value[i].toString());
+				}else{
+					byte_arr[i] = 0f;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Long.class.isAssignableFrom(classType)){
+			Long[] byte_arr = new Long[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Long.parseLong(value[i].toString());
+				}else{
+					byte_arr[i] = 0L;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Long.TYPE.isAssignableFrom(classType)){
+			long[] byte_arr = new long[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Long.parseLong(value[i].toString());
+				}else{
+					byte_arr[i] = 0l;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Double.TYPE.isAssignableFrom(classType)){
+			double[] byte_arr = new double[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Double.parseDouble(value[i].toString());
+				}else{
+					byte_arr[i] = 0d;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Double.class.isAssignableFrom(classType)){
+			Double[] byte_arr = new Double[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("")){
+					byte_arr[i] =Double.parseDouble(value[i].toString());
+				}else{
+					byte_arr[i] = 0D;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Boolean.class.isAssignableFrom(classType)){
+			Boolean[] byte_arr = new Boolean[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("") && value.toString().equals("true") || value.toString().equals("1")){
+					byte_arr[i] = true;
+				}else{
+					byte_arr[i] = false;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
+			}
+		}
+		if(Boolean.TYPE.isAssignableFrom(classType)){
+			boolean[] byte_arr = new boolean[len];
+			for (int i = 0; i < len; i++) {
+				if(value[i]!=null && !value[i].toString().equals("") && value.toString().equals("true") || value.toString().equals("1")){
+					byte_arr[i] = true;
+				}else{
+					byte_arr[i] = false;
+				}
+			}
+			if(classType.isArray()){
+				return byte_arr;
+			}else{
+				return byte_arr[0];
 			}
 		}
 		return null;
 	}
-	public static void main(String[] args) {
-		char c = ' ';
-		System.out.println(c);
-	}
+
+
 	public Class<?> getClazz() {
 		return clazz;
 	}
-
 	public void setClazz(Class<?> clazz) {
 		this.clazz = clazz;
 	}

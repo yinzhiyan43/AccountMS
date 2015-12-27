@@ -19,7 +19,8 @@
    <form action="/${base}/user/login.do" method="post">
    	用户名<input type="text" name="username" /><br />
    	密码<input type="text" name="password" /><br />
-   	密码<input type="text" name="s" /><br />
+   	密码<input type="text" name="s.pid" /><br />
+   	密码<input type="text" name="s1.id" /><br />
    	<input type="submit" value="登录">
    </form>
   </body>

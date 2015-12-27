@@ -12,6 +12,8 @@ import org.dc.jdbc.core.ConnThreadShare;
 import org.dc.jdbc.core.ParamsHandle;
 import org.dc.jdbc.core.operate.InsertOneOper;
 import org.dc.jdbc.core.operate.SelectOneOper;
+
+import com.alibaba.druid.pool.DruidDataSource;
 /**
  * 数据持久化操作类
  * @author DC
@@ -19,16 +21,18 @@ import org.dc.jdbc.core.operate.SelectOneOper;
  */
 public class DBHelper {
 	private static Log log = LogFactory.getLog(DBHelper.class);
-	private DataSource dataSource;
+	private DruidDataSource dataSource;
 	private Connection conn;
 	private long threadId = Thread.currentThread().getId();
 
 	
 	public Connection getConnection() throws Exception{
-		if(conn==null){
+		System.out.println(dataSource.getActiveCount());
+		if(conn==null || conn.isClosed()){
 			conn = dataSource.getConnection();
 			ConnThreadShare.putConnect(threadId,conn);
 		}
+		System.out.println(dataSource.getActiveCount());
 		return conn;
 	}
 	public void closeConnection(){
@@ -99,10 +103,10 @@ public class DBHelper {
 		return InsertOneOper.insert(conn, sql_handle, params_obj);
 	}
 	
-	public DataSource getDataSource() {
+	public DruidDataSource getDataSource() {
 		return dataSource;
 	}
-	public void setDataSource(DataSource dataSource) {
+	public void setDataSource(DruidDataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 }

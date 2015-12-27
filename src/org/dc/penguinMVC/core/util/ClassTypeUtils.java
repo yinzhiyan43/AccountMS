@@ -1,38 +1,29 @@
 package org.dc.penguinMVC.core.util;
 
 public class ClassTypeUtils {
-	private static final String BYTE = "byte";
-	private static final String CHAR = "char";
-	private static final String INT = "int";
-	private static final String SHORT = "short";
-	private static final String FLOAT = "float";
-	private static final String LONG = "long";
-	private static final String DOUBLE = "double";
-	private static final String BOOLEAN = "boolean";
-	public static Object[] getNewInstances(String type,int len){
-		byte[] o =new byte[0];
-		if(BYTE.equals(type)){
+	public static Object[] getNewInstances(Class<?> type,int len){
+		if(Byte.TYPE.isAssignableFrom(type)){
 			return new Byte[len];
 		}
-		if(CHAR.equals(type)){
+		if(Character.TYPE.isAssignableFrom(type)){
 			return new Character[len];
 		}
-		if(INT.equals(type)){
+		if(Integer.TYPE.isAssignableFrom(type)){
 			return new Integer[len];
 		}
-		if(SHORT.equals(type)){
+		if(Short.TYPE.isAssignableFrom(type)){
 			return new Short[len];
 		}
-		if(FLOAT.equals(type)){
+		if(Float.TYPE.isAssignableFrom(type)){
 			return new Float[len];
 		}
-		if(LONG.equals(type)){
+		if(Long.TYPE.isAssignableFrom(type)){
 			return new Long[len];
 		}
-		if(DOUBLE.equals(type)){
+		if(Double.TYPE.isAssignableFrom(type)){
 			return new Double[len];
 		}
-		if(BOOLEAN.equals(type)){
+		if(Boolean.TYPE.isAssignableFrom(type)){
 			return new Boolean[len];
 		}
 		return null;
