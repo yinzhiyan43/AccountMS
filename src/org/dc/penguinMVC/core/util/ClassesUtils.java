@@ -14,7 +14,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import com.dc.module.system.controller.LoginController;
 public final class ClassesUtils {
  
     private ClassesUtils() {

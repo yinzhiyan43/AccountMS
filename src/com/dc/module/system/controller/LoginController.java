@@ -18,6 +18,7 @@ public class LoginController {
 	private LoginService loginService = ObjectFactory.getPrototypeByProxy(LoginService.class);
 	@RequestMapping("/login")
 	public String login(int[] s,Map<String,String[]> paramMap,HttpSession session){
+		System.out.println("LoginController.login()");
 		try {
 			Map<String, Object> userMap = loginService.login(paramMap);
 			if(userMap!=null){

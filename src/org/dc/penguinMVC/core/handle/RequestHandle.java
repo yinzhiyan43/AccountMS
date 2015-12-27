@@ -1,10 +1,13 @@
 package org.dc.penguinMVC.core.handle;
 
+import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.dc.penguinMVC.core.util.ClassTypeUtils;
 
 public class RequestHandle {
 	/*private Object obj;
@@ -25,19 +28,17 @@ public class RequestHandle {
 				if(Map.class.isAssignableFrom(paramType)){
 					paramObjs[i] = map;
 				}else if(paramType.getClassLoader()==null){//基本数据类型
-					Object[] obj = (Object[])map.get(paramName[i]);
-					if(Object[].class.isAssignableFrom(paramType)){
-						if(obj!=null){
-							for (int j = 0; j < obj.length; j++) {
-								obj[j] =getTypeValue(paramType,obj[j]);
+					Object[] objs = (Object[])map.get(paramName[i]);
+					if(objs!=null && objs.length>0){
+						if(paramType.isArray()){
+							Object[] myparamObjs = ClassTypeUtils.getNewInstances(paramType.getComponentType().getSimpleName(), objs.length);
+							for (int j = 0; j < objs.length; j++) {
+								System.out.println(paramType.getComponentType().getName());
+								myparamObjs[j] = getTypeValue(paramType.getComponentType(),objs[j]);
 							}
-						}
-						paramObjs[i] = obj;
-					}else{
-						if(obj==null){
-							paramObjs[i] =getTypeValue(paramType,null);
+							paramObjs[i] = myparamObjs;
 						}else{
-							paramObjs[i] =getTypeValue(paramType,obj[0]);
+							paramObjs[i] =getTypeValue(paramType,objs[0]);
 						}
 					}
 				}else if(ServletRequest.class.isAssignableFrom(paramType)){
@@ -50,67 +51,66 @@ public class RequestHandle {
 			}
 		}
 		Object obj = clazz.newInstance();
+		//paramObjs[0] = new int[10];
 		return obj.getClass().getMethod(methodName, parameterTypes).invoke(obj, paramObjs);
 	}
 
 
 	public Object getTypeValue(Class<?> paramTpye,Object value){
-		if(Object.class.isAssignableFrom(paramTpye)){
-			if(String.class.isAssignableFrom(paramTpye)){
-				if(value!=null){
-					return value.toString();
-				}else{
-					return new String();
-				}
+		if(String.class.isAssignableFrom(paramTpye)){
+			if(value!=null){
+				return value.toString();
+			}else{
+				return new String();
 			}
-			if(Integer.class.isAssignableFrom(paramTpye)){
-				if(value!=null && !value.toString().equals("")){
-					return Integer.parseInt(value.toString());
-				}else{
-					return 0;
-				}
+		}
+		if(Integer.class.isAssignableFrom(paramTpye) || paramTpye.getSimpleName().equals("int")){
+			if(value!=null && !value.toString().equals("")){
+				return Integer.parseInt(value.toString());
+			}else{
+				return 0;
 			}
-			if(Float.class.isAssignableFrom(paramTpye)){
-				if(value!=null && !value.toString().equals("")){
-					return Float.parseFloat(value.toString());
-				}else{
-					return 0F;
-				}
+		}
+		if(Float.class.isAssignableFrom(paramTpye) || paramTpye.getName().equals("float")){
+			if(value!=null && !value.toString().equals("")){
+				return Float.parseFloat(value.toString());
+			}else{
+				return 0F;
 			}
-			if(Double.class.isAssignableFrom(paramTpye)){
-				if(value!=null && !value.equals("")){
-					return Double.parseDouble(value.toString());
-				}else{
-					return 0D;
-				}
+		}
+		if(Double.class.isAssignableFrom(paramTpye) || paramTpye.getName().equals("double")){
+			if(value!=null && !value.equals("")){
+				return Double.parseDouble(value.toString());
+			}else{
+				return 0D;
 			}
-			if(Boolean.class.isAssignableFrom(paramTpye)){
-				if((value!=null && !value.toString().equals("") && value.toString().equals("true")) || value.toString().equals("1")){
-					return true;
-				}else{
-					return false;
-				}
+		}
+		if(Boolean.class.isAssignableFrom(paramTpye)){
+			if((value!=null && !value.toString().equals("") && value.toString().equals("true")) || value.toString().equals("1")){
+				return true;
+			}else{
+				return false;
 			}
-			if(Character.class.isAssignableFrom(paramTpye)){
-				if(value!=null && !value.toString().equals("")){
-					return value.toString().charAt(0);
-				}else{
-					return ' ';
-				}
+		}
+		if(Character.class.isAssignableFrom(paramTpye)){
+			if(value!=null && !value.toString().equals("")){
+				return value.toString().charAt(0);
+			}else{
+				return ' ';
 			}
-			if(Byte.class.isAssignableFrom(paramTpye)){
-				if(value!=null && !value.toString().equals("")){
-					return Byte.parseByte(value.toString());
-				}else{
-					return (byte)0;
-				}
+		}
+		if(Byte.class.isAssignableFrom(paramTpye)){
+			if(value!=null && !value.toString().equals("")){
+				return Byte.parseByte(value.toString());
+			}else{
+				return (byte)0;
 			}
-			if(Short.class.isAssignableFrom(paramTpye)){
-				if(value!=null && !value.toString().equals("")){
-					return Short.parseShort(value.toString());
-				}else{
-					return (byte)0;
-				}
+		}
+		if(Short.class.isAssignableFrom(paramTpye)){
+			if(value!=null && !value.toString().equals("")){
+				return Short.parseShort(value.toString());
+			}else{
+				return (byte)0;
 			}
 		}
 		return null;
