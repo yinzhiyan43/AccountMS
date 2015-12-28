@@ -11,7 +11,7 @@ import com.dc.utils.ObjectFactory;
 @Controller
 @RequestMapping("/account")
 public class AccountController {
-	private AccountService accountService = ObjectFactory.getPrototypeByProxy(AccountService.class);
+	private AccountService accountService = ObjectFactory.getSingletonByProxy(AccountService.class);
 	@RequestMapping("/addAccount")
 	public String addAccount(Map<String,String[]> paramMap){
 		try {

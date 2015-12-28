@@ -11,7 +11,7 @@ import com.dc.utils.EncryptUtils;
 import com.dc.utils.ObjectFactory;
 
 public class AccountService {
-	private DBHelper accountDBHelper = ObjectFactory.getAccDBHelper();
+	private DBHelper accountDBHelper = ObjectFactory.getAccDBHelper(DBHelper.class);
 	public Map<String,Object> login(Map<String,String[]> paramMap) throws Exception{
 		Map<String,Object> userMap = accountDBHelper.selectOne("select * from sys_userinfo where username=1");
 		return userMap;

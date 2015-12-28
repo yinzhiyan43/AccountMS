@@ -1,14 +1,9 @@
 package org.dc.jdbc.utils;
 
 import java.sql.Connection;
-import java.util.LinkedList;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dc.jdbc.core.ConnThreadShare;
+import org.dc.jdbc.core.ConnectionManager;
 import org.dc.jdbc.core.ParamsHandle;
 import org.dc.jdbc.core.operate.InsertOneOper;
 import org.dc.jdbc.core.operate.SelectOneOper;
@@ -20,62 +15,10 @@ import com.alibaba.druid.pool.DruidDataSource;
  * @time 2015-12-09
  */
 public class DBHelper {
-	private static Log log = LogFactory.getLog(DBHelper.class);
 	private DruidDataSource dataSource;
-	private Connection conn;
-	private long threadId = Thread.currentThread().getId();
-
 	
-	public Connection getConnection() throws Exception{
-		System.out.println(dataSource.getActiveCount());
-		if(conn==null || conn.isClosed()){
-			conn = dataSource.getConnection();
-			ConnThreadShare.putConnect(threadId,conn);
-		}
-		System.out.println(dataSource.getActiveCount());
-		return conn;
-	}
-	public void closeConnection(){
-		try{
-			LinkedList<Connection> connList = ConnThreadShare.getConnList(threadId);
-			for (int i = 0,i_len=connList.size(); i < i_len; i++) {
-				try{
-					connList.get(i).close();
-				}catch (Exception e) {
-					log.error("",e);
-				}
-			}
-		}catch (Exception e) {
-			log.error("",e);
-		}finally{
-			ConnThreadShare.removeConnect(threadId);
-		}
-	}
-	public void rollback(){
-		LinkedList<Connection> connList = ConnThreadShare.getConnList(threadId);
-		for (int i = 0,i_len=connList.size(); i < i_len; i++) {
-			try{
-				connList.get(i).rollback();
-			}catch (Exception e) {
-				log.error("",e);
-			}
-		}
-	}
-	public void commit(){
-		LinkedList<Connection> connList = ConnThreadShare.getConnList(threadId);
-		for (int i = 0,i_len=connList.size(); i < i_len; i++) {
-			try{
-				Connection conn = connList.get(i);
-				if(conn.getAutoCommit()==false){
-					conn.commit();
-				}
-			}catch (Exception e) {
-				log.error("",e);
-			}
-		}
-	}
 	public <T> T selectOne(String sql,Class<?> cls,Object params) throws Exception{
-		Connection conn = getConnection();
+		Connection conn = ConnectionManager.getConnection(dataSource);
 		
 		Map<String,Object> pms_Map = ParamsHandle.paramParse(sql,params);
 		String sql_handle = pms_Map.get(ParamsHandle.SQLKey).toString();
@@ -94,7 +37,7 @@ public class DBHelper {
 	}
 	
 	public int insert(String sql,Object params) throws Exception{
-		Connection conn = getConnection();
+		Connection conn = ConnectionManager.getConnection(dataSource);
 		
 		Map<String,Object> pms_Map = ParamsHandle.paramParse(sql,params);
 		String sql_handle = pms_Map.get(ParamsHandle.SQLKey).toString();

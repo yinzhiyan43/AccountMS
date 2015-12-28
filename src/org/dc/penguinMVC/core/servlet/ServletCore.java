@@ -79,11 +79,11 @@ public class ServletCore implements Servlet{
 								info.setMethodName(m.getName());
 								info.setParameterTypes(m.getParameterTypes());
 								info.setParamName(ClassesUtils.getMethodParamNames(m,is));
-								is.close();
 								RequestInit.put(requestURL, info);
 							}
 						}
 					}
+					is.close();
 				}
 			} catch (Exception e) {
 				log.error("",e);

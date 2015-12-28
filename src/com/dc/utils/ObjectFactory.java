@@ -13,7 +13,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 public class ObjectFactory {
 	private static Lock lock = new ReentrantLock();
-	private static Map<Class<?>,Object> objMap = new HashMap<Class<?>,Object>();
+	private static Map<Object,Object> objMap = new HashMap<Object,Object>();
 	public static DruidDataSource testSource = new DruidDataSource();
 	public static DruidDataSource accSource = new DruidDataSource();
 	static{
@@ -56,15 +56,51 @@ public class ObjectFactory {
 		accSource.setPoolPreparedStatements(false);
 		accSource.setDriverClassName("com.mysql.jdbc.Driver");
 	}
-	public static DBHelper getTestDBHelper(){
-		DBHelper db = new DBHelper();
-		db.setDataSource(testSource);
-		return db;
+	@SuppressWarnings("unchecked")
+	public static <T> T getTestDBHelper(Class<?> clazz){
+		Object obj = objMap.get(clazz.hashCode());
+		if(obj!=null){
+			return (T) obj;
+		}
+		try {
+			lock.lock();
+			Object o = objMap.get(clazz.hashCode());
+			if(o!=null){
+				return (T) o;
+			}
+			DBHelper db = (DBHelper) clazz.newInstance();
+			db.setDataSource(testSource);
+			objMap.put(db.hashCode(), db);
+			return (T)db;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			lock.unlock();
+		}
+		return null;
 	}
-	public static DBHelper getAccDBHelper(){
-		DBHelper db = new DBHelper();
-		db.setDataSource(accSource);
-		return db;
+	@SuppressWarnings("unchecked")
+	public static <T> T  getAccDBHelper(Class<?> clazz){
+		Object obj = objMap.get(clazz.hashCode());
+		if(obj!=null){
+			return (T) obj;
+		}
+		try {
+			lock.lock();
+			Object o = objMap.get(clazz.hashCode());
+			if(o!=null){
+				return (T) o;
+			}
+			DBHelper db = (DBHelper) clazz.newInstance();
+			db.setDataSource(accSource);
+			objMap.put(db.hashCode(), db);
+			return (T)db;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			lock.unlock();
+		}
+		return null;
 	}
 	@SuppressWarnings("unchecked")
 	public static <T> T getSingletonByProxy(Class<?> clazz){

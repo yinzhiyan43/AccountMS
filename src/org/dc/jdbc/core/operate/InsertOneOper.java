@@ -11,6 +11,9 @@ public class InsertOneOper {
 	public static int insert(Connection conn,String sql,Object[] params) throws Exception{
 		PreparedStatement ps = null;
 		try {
+			if(conn.getAutoCommit()==true){
+				conn.setAutoCommit(false);
+			}
 			ps = conn.prepareStatement(sql);
 			if(params!=null && params.length>0){
 				for (int i = 0; i < params.length; i++) {

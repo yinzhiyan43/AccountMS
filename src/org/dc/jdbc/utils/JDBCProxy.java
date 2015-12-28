@@ -6,9 +6,7 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
-import org.dc.jdbc.core.ConnThreadShare;
-
-import com.dc.utils.ObjectFactory;
+import org.dc.jdbc.core.ConnectionManager;
 
 public final class JDBCProxy implements MethodInterceptor {
 	private static class JDBCProxyHolder {    
@@ -25,17 +23,15 @@ public final class JDBCProxy implements MethodInterceptor {
 	private Object target;
 	public Object intercept(Object obj, Method arg1, Object[] arg2, MethodProxy proxy) throws Throwable {
 		Object invokeObj = null;
-		long threadId = Thread.currentThread().getId();
 		try{
 			invokeObj = proxy.invokeSuper(obj, arg2);
 		}catch(Throwable e){
-			ConnThreadShare.rollback(threadId);
+			ConnectionManager.rollback();
 			throw e;
 		}finally{
-			ConnThreadShare.commit(threadId);
-			ConnThreadShare.closeConnection(threadId);
+			ConnectionManager.commit();
+			ConnectionManager.closeConnection();
 		}
-		System.out.println(ObjectFactory.accSource.getActiveCount());
 		return invokeObj;
 	}
 	public Object getTarget(Object target) {

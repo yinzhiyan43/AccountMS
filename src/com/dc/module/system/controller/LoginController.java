@@ -16,7 +16,7 @@ import com.dc.utils.ObjectFactory;
 @Controller
 @RequestMapping("/user")
 public class LoginController {
-	private LoginService loginService = ObjectFactory.getPrototypeByProxy(LoginService.class);
+	private LoginService loginService = ObjectFactory.getSingletonByProxy(LoginService.class);
 	@RequestMapping("/login")
 	public String login(Student s,Student s1,String username,Map<String,String[]> paramMap,HttpSession session){
 		try {
@@ -28,9 +28,5 @@ public class LoginController {
 			e.printStackTrace();
 		}
 		return "/WEB-INF/view/system/search.jsp";
-	}
-	public static void main(String[] args) {
-		char[] c =new char[10];
-		System.out.println(c);
 	}
 }
